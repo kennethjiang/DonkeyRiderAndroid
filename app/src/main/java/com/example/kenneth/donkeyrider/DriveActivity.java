@@ -8,8 +8,13 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.example.kenneth.donkeyrider.orientation.Orientation;
 import com.example.kenneth.donkeyrider.orientation.OrientationListener;
@@ -33,9 +38,24 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
     TimerTask timerTask;
 
     private float angle;
-    private float throttle;
     private String mode;
     private String recording;
+
+    private float getThrottle() {
+        ToggleButton btn = (ToggleButton) findViewById(R.id.driveButton);
+        if (!btn.isChecked()) {
+            return 0;
+        } else {
+            Spinner spinner = (Spinner) findViewById(R.id.throttleSpinner);
+            return Float.valueOf(spinner.getSelectedItem().toString().replaceAll("%", "")) / 100.0f;
+        }
+    }
+
+    private float getAngle() {
+        Spinner spinner = (Spinner) findViewById(R.id.steeringSpinner);
+        float factor = Float.valueOf(spinner.getSelectedItem().toString().replaceAll("x", ""));
+        return Math.min(1.0f, this.angle * factor);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +63,9 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
         setContentView(R.layout.activity_drive);
         this.provider = new OrientationProvider(this);
         this.btAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        this.setupThrottleSpinner();
+        this.setupSteeringSpinner();
     }
 
     @Override
@@ -50,7 +73,6 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
         super.onResume();
 
         this.angle = 0;
-        this.throttle = 0;
         this.mode = "user";
         this.recording = "false";
 
@@ -136,8 +158,8 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
         timerTask = new TimerTask() {
             public void run() {
                 String msg = String.format("%f,%f,%s,%s\n",
-                        DriveActivity.this.angle,
-                        DriveActivity.this.throttle,
+                        DriveActivity.this.getAngle(),
+                        DriveActivity.this.getThrottle(),
                         DriveActivity.this.mode,
                         DriveActivity.this.recording);
 
@@ -157,4 +179,19 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
         };
     }
 
+    private void setupThrottleSpinner() {
+        Spinner spinner = (Spinner) findViewById(R.id.throttleSpinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.throttle_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+    }
+
+    private void setupSteeringSpinner() {
+        Spinner spinner = (Spinner) findViewById(R.id.steeringSpinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.steering_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+    }
 }
