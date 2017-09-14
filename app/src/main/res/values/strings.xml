@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">DonkeyRider</string>
+    <string name="not_supported">Orientation not supported</string>
+    <string name="calibrate_saved">Custom calibration saved !</string>
+    <string name="calibrate_failed">Calibration failed !</string>
+    <string name="calibrate_restored">Original calibration restored !</string>
+</resources>
