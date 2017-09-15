@@ -15,8 +15,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".DriveActivity"
-            android:screenOrientation="landscape">
-
+            android:screenOrientation="landscape"
+            android:parentActivityName=".BTConnectActivity">
         </activity>
         <activity
             android:name=".BTConnectActivity"

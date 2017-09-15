@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.BoolRes;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -90,6 +91,7 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
             this.provider.startListening(this);
         } else {
             Toast.makeText(this, getText(R.string.not_supported), Toast.LENGTH_LONG).show();
+            NavUtils.navigateUpFromSameTask(this);
         }
         final String address = getIntent().getStringExtra(DriveActivity.EXTRA_BT_REMOTE_DEIVCE_ADDRESS);
         BluetoothDevice remoteDevice = this.btAdapter.getRemoteDevice(address);
@@ -105,6 +107,7 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
                 Log.e("BluetoothService", "unable to close()", e2);
             }
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            NavUtils.navigateUpFromSameTask(this);
         }
         this.startTimer();
     }
@@ -129,7 +132,9 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
 
         Spinner spinner = (Spinner) findViewById(R.id.steeringSpinner);
         float factor = Float.valueOf(spinner.getSelectedItem().toString().replaceAll("x", ""));
-        this.angle = Math.min(1.0f, this.angle * factor);
+        this.angle *= factor;
+        this.angle = Math.min(1.0f, this.angle);
+        this.angle = Math.max(-1.0f, this.angle);
 
         TextView textView = (TextView) findViewById(R.id.angleText);
         textView.setText(String.format("%.3f", this.angle));
@@ -186,6 +191,7 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
                             Log.e("BluetoothService", "unable to close()", e2);
                         }
                         Toast.makeText(DriveActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        NavUtils.navigateUpFromSameTask(DriveActivity.this);
                     }
                 }
             }
@@ -208,8 +214,5 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
         adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner1.setAdapter(adapter1);
         spinner1.setSelection(3);
-
-        RadioButton userRadio = (RadioButton) findViewById(R.id.userRadioBtn);
-        userRadio.setSelected(true);
     }
 }
