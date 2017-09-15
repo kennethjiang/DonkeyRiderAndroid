@@ -7,13 +7,15 @@
     tools:context="com.example.kenneth.donkeyrider.DriveActivity">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/angleText"
         android:layout_width="216dp"
         android:layout_height="59dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="29dp"
-        android:text="Hello World!"
+        android:textAlignment="center"
+        android:textSize="30sp"
+        android:textStyle="bold"
         app:layout_constraintHorizontal_bias="0.592"
         app:layout_constraintLeft_toRightOf="@+id/driveButton"
         app:layout_constraintRight_toLeftOf="@+id/recordingToggle"
@@ -115,11 +117,11 @@
     <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="216dp"
         android:layout_height="72dp"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="41dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/angleText"
         app:layout_constraintLeft_toRightOf="@+id/driveButton"
         android:layout_marginLeft="8dp"
         app:layout_constraintRight_toLeftOf="@+id/recordingToggle"
@@ -127,17 +129,16 @@
         android:weightSum="1">
 
         <RadioButton
-            android:id="@+id/radio_pirates"
-            android:layout_width="105dp"
-            android:layout_height="44dp"
-            android:onClick="onRadioButtonClicked"
+            android:id="@+id/userRadioBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="USER" />
 
-        <RadioButton android:id="@+id/radio_ninjas"
+        <RadioButton
+            android:id="@+id/autoRadioBtn"
             android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:text="AUTO"
-            android:onClick="onRadioButtonClicked" />
+            android:layout_height="wrap_content"
+            android:text="AUTO" />
     </RadioGroup>
 
 </android.support.constraint.ConstraintLayout>

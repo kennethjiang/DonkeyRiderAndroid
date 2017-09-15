@@ -6,11 +6,13 @@ import android.bluetooth.BluetoothSocket;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.BoolRes;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,8 +40,6 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
     TimerTask timerTask;
 
     private float angle;
-    private String mode;
-    private String recording;
 
     private float getThrottle() {
         ToggleButton btn = (ToggleButton) findViewById(R.id.driveButton);
@@ -52,9 +52,21 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
     }
 
     private float getAngle() {
-        Spinner spinner = (Spinner) findViewById(R.id.steeringSpinner);
-        float factor = Float.valueOf(spinner.getSelectedItem().toString().replaceAll("x", ""));
-        return Math.min(1.0f, this.angle * factor);
+        return this.angle;
+    }
+
+    private String getMode() {
+        RadioButton userRadio = (RadioButton) findViewById(R.id.userRadioBtn);
+        if (userRadio.isChecked()) {
+            return "user";
+        } else {
+            return "local_angle"; // for self driving mode
+        }
+    }
+
+    private Boolean getRecording() {
+        ToggleButton recordingBtn = (ToggleButton) findViewById(R.id.recordingToggle);
+        return recordingBtn.isChecked();
     }
 
     @Override
@@ -64,8 +76,7 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
         this.provider = new OrientationProvider(this);
         this.btAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        this.setupThrottleSpinner();
-        this.setupSteeringSpinner();
+        this.initControls();
     }
 
     @Override
@@ -73,8 +84,6 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
         super.onResume();
 
         this.angle = 0;
-        this.mode = "user";
-        this.recording = "false";
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         if (this.provider.isSupported()) {
@@ -118,8 +127,12 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
     public void onOrientationChanged(Orientation orientation, float pitch, float roll, float balance) {
         this.angle = roll/-90.0f;
 
-        TextView textView = (TextView) findViewById(R.id.textView);
-        textView.setText(String.format("pitch: %f - roll: %f - balance %f", pitch, roll, balance));
+        Spinner spinner = (Spinner) findViewById(R.id.steeringSpinner);
+        float factor = Float.valueOf(spinner.getSelectedItem().toString().replaceAll("x", ""));
+        this.angle = Math.min(1.0f, this.angle * factor);
+
+        TextView textView = (TextView) findViewById(R.id.angleText);
+        textView.setText(String.format("%.3f", this.angle));
     }
 
     @Override
@@ -157,11 +170,11 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
     private void initializeTimerTask() {
         timerTask = new TimerTask() {
             public void run() {
-                String msg = String.format("%f,%f,%s,%s\n",
+                String msg = String.format("%f,%f,%s,%b\n",
                         DriveActivity.this.getAngle(),
                         DriveActivity.this.getThrottle(),
-                        DriveActivity.this.mode,
-                        DriveActivity.this.recording);
+                        DriveActivity.this.getMode(),
+                        DriveActivity.this.getRecording());
 
                 if (DriveActivity.this.btSocket != null && DriveActivity.this.btSocket.isConnected()) {
                     try {
@@ -179,19 +192,24 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
         };
     }
 
-    private void setupThrottleSpinner() {
+    private void initControls() {
+        // Throttle spinner
         Spinner spinner = (Spinner) findViewById(R.id.throttleSpinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.throttle_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-    }
+        spinner.setSelection(0);
 
-    private void setupSteeringSpinner() {
-        Spinner spinner = (Spinner) findViewById(R.id.steeringSpinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+        // Steering spinner
+        Spinner spinner1 = (Spinner) findViewById(R.id.steeringSpinner);
+        ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(this,
                 R.array.steering_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner1.setAdapter(adapter1);
+        spinner1.setSelection(3);
+
+        RadioButton userRadio = (RadioButton) findViewById(R.id.userRadioBtn);
+        userRadio.setSelected(true);
     }
 }
