@@ -33,6 +33,8 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
 
     private static UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
+    private static final double EWM_ALPHA = 0.5;
+
     private OrientationProvider provider;
     private BluetoothAdapter btAdapter;
     private BluetoothSocket btSocket;
@@ -128,7 +130,7 @@ public class DriveActivity extends AppCompatActivity implements OrientationListe
 
     @Override
     public void onOrientationChanged(Orientation orientation, float pitch, float roll, float balance) {
-        this.angle = roll/-90.0f;
+        this.angle = (float) ((roll/-90.0) * DriveActivity.EWM_ALPHA + this.angle * (1 - DriveActivity.EWM_ALPHA));
 
         Spinner spinner = (Spinner) findViewById(R.id.steeringSpinner);
         float factor = Float.valueOf(spinner.getSelectedItem().toString().replaceAll("x", ""));
